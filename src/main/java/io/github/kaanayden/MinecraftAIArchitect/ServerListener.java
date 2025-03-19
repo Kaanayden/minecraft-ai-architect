@@ -10,6 +10,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import static org.bukkit.Bukkit.getLogger;
 import static org.bukkit.Bukkit.getServer;
 
+import static io.github.kaanayden.MinecraftAIArchitect.LLMTools.LLMTools.messageLLM;
+
 public class ServerListener implements Listener {
 
     @EventHandler
@@ -23,12 +25,10 @@ public class ServerListener implements Listener {
         if (event.getMessage().trim().equalsIgnoreCase("Please give me diamonds")) {
             event.getPlayer().sendMessage("10 diamonds have been added to your inventory.");
             event.getPlayer().getInventory().addItem(new org.bukkit.inventory.ItemStack(org.bukkit.Material.DIAMOND, 10));
+        } else  {
+            event.getPlayer().sendMessage("I am asking LLM about '" + event.getMessage() + "'");
+            event.getPlayer().sendMessage(messageLLM(event.getMessage()));
         }
-    }
-
-    @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
-        Bukkit.broadcastMessage("Player " + event.getPlayer().getName() + " moved to " + event.getTo());
     }
 
 }
