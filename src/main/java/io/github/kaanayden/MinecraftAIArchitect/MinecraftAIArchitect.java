@@ -7,6 +7,7 @@ public class MinecraftAIArchitect extends JavaPlugin {
     @Override
     public void onEnable() {
         getLogger().info("onEnable is called. AI Architect is ready!");
+        getServer().getPluginManager().registerEvents(new ServerListener(), this);
     }
     @Override
     public void onDisable() {
