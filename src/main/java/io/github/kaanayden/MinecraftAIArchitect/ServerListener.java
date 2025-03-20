@@ -34,9 +34,10 @@ public class ServerListener implements Listener {
         if ( AIManager.isPlayerEnabled(player) ) {
             new Thread(new Runnable() {
                 public void run() {
-                    String aiResponse = LLMTools.messageLLM(event.getMessage());
-                    AIManager.addMessageToChatHistory(player, event.getMessage(), ChatHistory.Role.PLAYER);
-                    AIManager.addMessageToChatHistory(player, aiResponse, ChatHistory.Role.AI);
+                    ChatHistory chatHistory = AIManager.getChatHistory(player);
+                    String aiResponse = LLMTools.messageLLM(event.getMessage(), chatHistory);
+                    AIManager.addMessageToChatHistory(player, event.getMessage(), ChatHistory.Role.user);
+                    AIManager.addMessageToChatHistory(player, aiResponse, ChatHistory.Role.assistant);
                     Bukkit.broadcastMessage("AI to " + player.getName() + ": " + aiResponse);
                 }
             }).start();

@@ -2,12 +2,16 @@ package io.github.kaanayden.MinecraftAIArchitect.LLMTools;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.kaanayden.MinecraftAIArchitect.LLMTools.ResponseTypes.ChatCompletion;
+import io.github.kaanayden.MinecraftAIArchitect.Memory.ChatHistory;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 
 
 public class LLMTools {
@@ -20,19 +24,7 @@ public class LLMTools {
         apiKey = _apiKey;
     }
 
-    public static String messageLLM(String message) {
-
-        String requestBody = String.format("""
-            {
-                "model": "gpt-4o",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": "%s"
-                    }
-                ]
-            }
-        """, message.replace("\"", "\\\""));  // Escape quotes to prevent JSON syntax errors
+    private static ChatCompletion postMessage(String requestBody) {
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -48,8 +40,7 @@ public class LLMTools {
                 // Convert JSON response to ChatCompletion object
                 // Convert JSON response to ChatCompletion object
                 ObjectMapper objectMapper = new ObjectMapper();
-                ChatCompletion chatCompletion = objectMapper.readValue(response.body(), ChatCompletion.class);
-                return chatCompletion.choices.getFirst().message.content;
+                return objectMapper.readValue(response.body(), ChatCompletion.class);
             }
 
             throw new RuntimeException("LLM returned an error: " + response.statusCode() + " " + response.body());
@@ -57,6 +48,75 @@ public class LLMTools {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
+
+    public static String messageLLM(String message) {
+
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        ObjectNode newMessageNode = objectMapper.createObjectNode();
+        newMessageNode.put("role", ChatHistory.Role.user.toString());
+        newMessageNode.put("content", message);
+
+        ArrayNode messagesArray = objectMapper.createArrayNode();
+        messagesArray.add(newMessageNode);
+
+        // Create request body JSON
+        ObjectNode requestBodyNode = objectMapper.createObjectNode();
+        requestBodyNode.put("model", "gpt-4o");
+        requestBodyNode.set("messages", messagesArray);
+
+        try {
+            String requestBody = objectMapper.writeValueAsString(requestBodyNode);
+
+            // Send request and return response
+            ChatCompletion chatCompletion = postMessage(requestBody);
+            return chatCompletion.choices.getFirst().message.content;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static String messageLLM(String message, ChatHistory chatHistory) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayNode messagesArray = objectMapper.createArrayNode();
+
+        for (ChatHistory.ChatMessage chatMessage : chatHistory.getMessages()) {
+            ObjectNode messageNode = objectMapper.createObjectNode();
+
+            String role = chatMessage.getRole().toString();
+            String currMessage = chatMessage.getMessage().replace("\"", "\\\""); // Escape quotes
+
+            messageNode.put("role", role);
+            messageNode.put("content", currMessage);
+
+            messagesArray.add(messageNode);
+        }
+
+        ObjectNode newMessageNode = objectMapper.createObjectNode();
+        newMessageNode.put("role", ChatHistory.Role.user.toString());
+        newMessageNode.put("content", message);
+
+        messagesArray.add(newMessageNode);
+
+        // Create request body JSON
+        ObjectNode requestBodyNode = objectMapper.createObjectNode();
+        requestBodyNode.put("model", "gpt-4o");
+        requestBodyNode.set("messages", messagesArray);
+
+        try {
+            String requestBody = objectMapper.writeValueAsString(requestBodyNode);
+
+            // Send request and return response
+            ChatCompletion chatCompletion = postMessage(requestBody);
+            return chatCompletion.choices.getFirst().message.content;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }

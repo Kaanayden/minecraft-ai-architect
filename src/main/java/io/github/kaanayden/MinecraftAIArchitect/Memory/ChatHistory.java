@@ -7,8 +7,9 @@ import java.util.ArrayList;
 public class ChatHistory {
 
     public enum Role {
-        AI,
-        PLAYER,
+        user,
+        assistant,
+        system
     }
 
     public static class ChatMessage {
