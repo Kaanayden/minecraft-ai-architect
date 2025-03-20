@@ -1,3 +1,9 @@
 name: MinecraftAIArchitect
 version: 1.0.0
 main: io.github.kaanayden.MinecraftAIArchitect.MinecraftAIArchitect
+
+commands:
+  ai:
+    description: Configure the AI Architect settings.
+    usage: /ai <status>
+    permission: minecraftaiarchitect.aiusage

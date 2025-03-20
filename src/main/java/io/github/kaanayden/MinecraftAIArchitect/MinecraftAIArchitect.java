@@ -22,8 +22,11 @@ public class MinecraftAIArchitect extends JavaPlugin {
         }
         LLMTools.buildClient(apiKey);
 
-        getLogger().info("onEnable is called. AI Architect is ready!");
+        // Registers
         getServer().getPluginManager().registerEvents(new ServerListener(), this);
+        this.getCommand("ai").setExecutor(new AICommand());
+
+        getLogger().info("onEnable is called. AI Architect is ready!");
     }
     @Override
     public void onDisable() {
