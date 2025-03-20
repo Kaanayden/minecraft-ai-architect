@@ -35,6 +35,9 @@ public class AICommand implements CommandExecutor {
                 } else {
                     player.sendMessage("AI is already disabled!");
                 }
+            } else {
+                player.sendMessage("You should specify the parameters 'on' or 'off'");
+                return false;
             }
 
             return true;
